@@ -1,15 +1,15 @@
-import unittest
 import allure
 import requests
 import random
 from web3 import Web3
 from eth_account import Account
 import time
+import pytest
 
 @allure.epic("API Testing")
-class TestAPIs(unittest.TestCase):
+class TestAPIs:
 
-    def setUp(self):
+    def setup_method(self):
         self.base_url = "https://dev-xplus.trytryc.com"
         self.address = "0x460a6603418b26a9968a0687e2c19dead9c94dd6"
         self.private_key = "361e8eed934170511e8d0fd1ae3d71f1996fc529aceeba202d2ca67e484cc4c4"
@@ -52,7 +52,7 @@ class TestAPIs(unittest.TestCase):
             allure.attach("Access Token", access_token, allure.attachment_type.TEXT)
             return access_token
         else:
-            self.fail(f"登录请求失败: {response.status_code}")
+            pytest.fail(f"登录请求失败: {response.status_code}")
 
     def get_user_info_headers(self):
         access_token = self.get_access_token()
@@ -65,6 +65,7 @@ class TestAPIs(unittest.TestCase):
         }
 
     @allure.feature("Get User Info")
+    @allure.story("Get User Information")
     def test_get_user_info(self):
         with allure.step("Send GET request to get user info"):
             user_info_url = f"{self.base_url}/im/api/user/info"
@@ -72,7 +73,7 @@ class TestAPIs(unittest.TestCase):
             response = requests.get(user_info_url, headers=user_info_headers)
 
         with allure.step("Check response status code"):
-            self.assertEqual(response.status_code, 200, f"Failed to get user info: {response.status_code}")
+            assert response.status_code == 200, f"Failed to get user info: {response.status_code}"
 
         with allure.step("Attach user info response"):
             user_info_result = response.text
@@ -81,6 +82,7 @@ class TestAPIs(unittest.TestCase):
             print(user_info_result)
 
     @allure.feature("Get Community List")
+    @allure.story("Get Community List Information")
     def test_get_community_list(self):
         community_list_url = f"{self.base_url}/im/api/dapp/community/list"
         community_list_headers = self.get_user_info_headers()
@@ -95,9 +97,10 @@ class TestAPIs(unittest.TestCase):
             print("Community List Response:")
             print(community_list_result)
         else:
-            self.fail(f"Failed to get community list: {response.status_code}")
+            pytest.fail(f"Failed to get community list: {response.status_code}")
 
     @allure.feature("Get Account List")
+    @allure.story("Get Account List Information")
     def test_get_account_list(self):
         account_list_url = f"{self.base_url}/asset/api/account/list"
         account_list_headers = self.get_user_info_headers()
@@ -110,7 +113,7 @@ class TestAPIs(unittest.TestCase):
             print("Account List Response:")
             print(account_list_result)
         else:
-            self.fail(f"Failed to get account list: {response.status_code}")
+            pytest.fail(f"Failed to get account list: {response.status_code}")
 
     def publish_feed(self, content_type, text_value=None):
         publish_url = f"{self.base_url}/feed/api/feed/publish"
@@ -158,19 +161,19 @@ class TestAPIs(unittest.TestCase):
             print(f"Publish Feed Result (contentType={content_type}, text={text_value}):")
             print(publish_result)
         else:
-            self.fail(f"Failed to publish feed (contentType={content_type}, text={text_value}): {response.status_code}")
+            pytest.fail(f"Failed to publish feed (contentType={content_type}, text={text_value}): {response.status_code}")
 
     @allure.feature("Publish Feed - Text")
+    @allure.story("Publish Text Feed")
     def test_publish_feed_text(self):
         self.publish_feed(content_type=1)
 
     @allure.feature("Publish Feed - Text with Image")
+    @allure.story("Publish Text Feed with Image")
     def test_publish_feed_text_image(self):
         self.publish_feed(content_type=2)
 
     @allure.feature("Publish Feed - Text with Video")
+    @allure.story("Publish Text Feed with Video")
     def test_publish_feed_text_video(self):
         self.publish_feed(content_type=3)
-
-if __name__ == "__main__":
-    unittest.main()
